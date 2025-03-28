@@ -33,7 +33,7 @@ This extension is perfect for users who want to reduce visual clutter or avoid s
 2. **Load the Extension in Chrome**:
    - Open Chrome and go to `chrome://extensions/`.
    - Enable **Developer mode** (toggle in the top-right corner).
-   - Click **Load unpacked** and select the `XFlagWordFilter` folder.
+   - Click **Load unpacked** and select the `XFilter` folder.
 
 3. **Verify Installation**:
    - The extension should appear in your Chrome extensions list with the name "X Flag & Word Filter."
