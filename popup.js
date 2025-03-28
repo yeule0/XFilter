@@ -1,3 +1,24 @@
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const html = document.documentElement;
+  const currentTheme = html.getAttribute('data-theme');
+  
+  // toggle the theme based on the current state
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  
+  // set the new theme
+  html.setAttribute('data-theme', newTheme);
+  const themeIcon = document.getElementById('theme-icon');
+  
+  //uUpdate the image source based on the new theme
+  if (newTheme === 'dark') {
+    themeIcon.classList = 'bi bi-sun-fill';
+  } else {
+    themeIcon.classList = 'bi bi-moon-fill';
+  }
+});
+
+
+
 document.getElementById('save').addEventListener('click', () => {
   const flags = document.getElementById('flags').value.split(',').map(flag => flag.trim());
   const words = document.getElementById('words').value.split(',').map(word => word.trim());
@@ -24,3 +45,4 @@ chrome.storage.sync.get(['flagsToHide', 'wordsToHide', 'filterAds', 'ircMode'], 
   document.getElementById('filterAds').checked = filterAds;
   document.getElementById('ircMode').checked = ircMode;
 });
+
