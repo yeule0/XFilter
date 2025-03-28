@@ -16,6 +16,8 @@ chrome.storage.sync.get(['flagsToHide', 'wordsToHide', 'filterAds', 'ircMode'], 
   function filterTweets() {
     document.querySelectorAll('[data-testid="tweet"]').forEach(tweet => {
       let shouldHide = false;
+
+      // Filter by flags and words
       const userNameElement = tweet.querySelector('[data-testid="UserName"]');
       if (userNameElement) {
         const displayNameElement = userNameElement.querySelector('span');
@@ -26,12 +28,25 @@ chrome.storage.sync.get(['flagsToHide', 'wordsToHide', 'filterAds', 'ircMode'], 
           shouldHide = hasFlag || hasWord;
         }
       }
+
+      // Filter ads
       if (filterAds) {
-        const adLabel = tweet.querySelector('span');
-        if (adLabel && adLabel.innerText === 'Ad') {
+        // Look for all <span> elements within the tweet
+        const spans = tweet.querySelectorAll('span');
+        let isAd = false;
+        spans.forEach(span => {
+          const text = span.innerText.trim();
+          if (text === 'Ad' || text === 'Promoted') { // Handle both "Ad" and "Promoted"
+            isAd = true;
+          }
+        });
+
+        if (isAd) {
           shouldHide = true;
+          console.log('Hiding ad tweet:', tweet.innerText.substring(0, 50) + '...');
         }
       }
+
       if (shouldHide) {
         tweet.style.display = 'none';
       }
