@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flag & Word Filter</title>
+</head>
+<body>
+  <h3>Enter flags to hide (e.g., 🇺🇸, 🏳️‍🌈)</h3>
+  <input type="text" id="flags" placeholder="Separate flags with commas">
+  <h3>Enter words to hide (e.g., crypto, bot)</h3>
+  <input type="text" id="words" placeholder="Separate words with commas">
+  <h3>Filter promoted posts</h3>
+  <label><input type="checkbox" id="filterAds"> Hide tweets labeled "Ad"</label>
+  <h3>IRC Mode</h3>
+  <label><input type="checkbox" id="ircMode"> Hide images, videos, and profile pics (text-only)</label>
+  <br><button id="save">Save</button>
+  <script src="popup.js"></script>
+</body>
+</html>

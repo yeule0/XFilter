@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "X Flag & Word Filter",
+  "version": "1.0",
+  "description": "Hide tweets from accounts with specific flags or words in their names",
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://twitter.com/*", "https://x.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
