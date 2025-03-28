@@ -76,4 +76,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Contact
 
-For questions, suggestions, or issues, please open an issue on this repository or contact me at X @yeule0
+For questions, suggestions, or issues, please open an issue on this repository or contact me on [X (Twitter)](https://twitter.com/yeule0).
