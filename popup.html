@@ -8,31 +8,35 @@
   <meta name="color-scheme" content="light dark">
   <title>Flag & Word Filter</title>
 </head>
-  <body>
-    <main class="container">
-      <button id="themeBtn">
-        <i id="theme-icon" class="bi bi-sun-fill"></i>
-      </button>
-      <div>
-        <h4>Enter flags to hide (e.g., 🇺🇸, 🏳️‍🌈)</h4>
-        <input type="text" id="flags" placeholder="Separate flags with commas">
-      </div>
-      <div>
-        <h4>Enter words to hide (e.g., crypto, bot)</h4>
-        <input type="text" id="words" placeholder="Separate words with commas">
-      </div>
-      <div>
-        <h4>Filter promoted posts</h4>
-        <label><input type="checkbox" id="filterAds"> Hide tweets labeled "Ad"</label>
-      </div>
-      <div>
-        <h4>IRC Mode</h4>
-        <label><input type="checkbox" id="ircMode"> Hide images, videos, and profile pics (text-only)</label>
-      </div>
-      <button id="save">Save</button>
-    </main>
-    <script src="popup.js"></script>
-  </body>
+<body>
+  <main class="container">
+    <button id="themeBtn">
+      <i id="theme-icon" class="bi bi-sun-fill"></i>
+    </button>
+    <div>
+      <h4>Enter flags to hide (e.g., 🇺🇸, 🏳️‍🌈)</h4>
+      <input type="text" id="flags" placeholder="Separate flags with commas">
+    </div>
+    <div>
+      <h4>Enter words to hide (e.g., crypto, bot)</h4>
+      <input type="text" id="words" placeholder="Separate words with commas">
+    </div>
+    <div>
+      <h4>Filter promoted posts</h4>
+      <label><input type="checkbox" id="filterAds"> Hide tweets labeled "Ad"</label>
+    </div>
+    <div>
+      <h4>IRC Mode</h4>
+      <label><input type="checkbox" id="ircMode"> Hide images, videos, and profile pics (text-only)</label>
+    </div>
+    <div>
+      <h4>Hide Right Section</h4>
+      <label><input type="checkbox" id="hideRightSection"> Remove the right sidebar (e.g., "What's happening", "Who to follow")</label>
+    </div>
+    <button id="save">Save</button>
+  </main>
+  <script src="popup.js"></script>
+</body>
 </html>
 
 <style>
