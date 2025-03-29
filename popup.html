@@ -1,20 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <meta name="color-scheme" content="light dark">
   <title>Flag & Word Filter</title>
 </head>
-<body>
-  <h3>Enter flags to hide (e.g., 🇺🇸, 🏳️‍🌈)</h3>
-  <input type="text" id="flags" placeholder="Separate flags with commas">
-  <h3>Enter words to hide (e.g., crypto, bot)</h3>
-  <input type="text" id="words" placeholder="Separate words with commas">
-  <h3>Filter promoted posts</h3>
-  <label><input type="checkbox" id="filterAds"> Hide tweets labeled "Ad"</label>
-  <h3>IRC Mode</h3>
-  <label><input type="checkbox" id="ircMode"> Hide images, videos, and profile pics (text-only)</label>
-  <br><button id="save">Save</button>
-  <script src="popup.js"></script>
-</body>
+  <body>
+    <main class="container">
+      <button id="themeBtn">
+        <i id="theme-icon" class="bi bi-sun-fill"></i>
+      </button>
+      <div>
+        <h4>Enter flags to hide (e.g., 🇺🇸, 🏳️‍🌈)</h4>
+        <input type="text" id="flags" placeholder="Separate flags with commas">
+      </div>
+      <div>
+        <h4>Enter words to hide (e.g., crypto, bot)</h4>
+        <input type="text" id="words" placeholder="Separate words with commas">
+      </div>
+      <div>
+        <h4>Filter promoted posts</h4>
+        <label><input type="checkbox" id="filterAds"> Hide tweets labeled "Ad"</label>
+      </div>
+      <div>
+        <h4>IRC Mode</h4>
+        <label><input type="checkbox" id="ircMode"> Hide images, videos, and profile pics (text-only)</label>
+      </div>
+      <button id="save">Save</button>
+    </main>
+    <script src="popup.js"></script>
+  </body>
 </html>
+
+<style>
+  main {
+    position: relative;
+    min-width: 400px;
+  }
+
+  #themeBtn {
+    position: absolute;
+    padding: 0;
+    height: 2rem!important;
+    width: 2rem!important;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    justify-content: center;
+    border-radius: 100%;
+    align-items: center;
+  }
+
+  /* light background for the button */
+  html[data-theme='dark'] #themeBtn {
+    background-color: #f4f4f4; 
+    color: #111;
+  }
+
+  /* dark background for the button */
+  html[data-theme='light'] #themeBtn {
+    background-color: #111111; 
+    color: #fff;
+  }
+  
+  #save {
+    width: 100%;
+    margin-top: 2rem;
+  }
+</style>
