@@ -5,10 +5,11 @@ A Chrome extension to enhance your experience on X by filtering tweets and enabl
 
 ## Overview
 
-The **X Flag & Word Filter** Chrome extension allows you to customize your X (formerly Twitter) experience by:
+The **XFilter** Chrome extension allows you to customize your X (formerly Twitter) experience by:
 - **Filtering Tweets**: Hide tweets from users whose display names contain specific flags or words (e.g., emojis, keywords).
 - **Text-Only Mode (IRC Mode)**: Hide all images, videos, and profile pics on X, creating a distraction-free, text-only experience.
 - **Ad Filtering**: Optionally hide ads on X.
+- **Hide Sidebar**: Option to hide right sidebar.
 
 This extension is perfect for users who want to reduce visual clutter or avoid specific content on X.
 
@@ -17,6 +18,7 @@ This extension is perfect for users who want to reduce visual clutter or avoid s
 - **Customizable Filtering**: Add flags (e.g., emojis) or words to hide tweets from users with matching display names.
 - **IRC Mode**: Enable a text-only mode to hide all media (profile pics, images, videos) on X.
 - **Ad Blocking**: Optionally hide promoted tweets (ads).
+- **Hide Sidebar**: Option to hide right sidebar.
 - **Lightweight and Easy to Use**: Simple popup interface to configure settings.
 
 ## Installation
@@ -36,7 +38,7 @@ This extension is perfect for users who want to reduce visual clutter or avoid s
    - Click **Load unpacked** and select the `XFilter` folder.
 
 3. **Verify Installation**:
-   - The extension should appear in your Chrome extensions list with the name "X Flag & Word Filter."
+   - The extension should appear in your Chrome extensions list with the name "XFilter."
    - You should see the extension icon in your browser toolbar.
 
 
