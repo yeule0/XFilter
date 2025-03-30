@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "XFilter",
-  "version": "1.0",
-  "description": "Hide tweets from accounts with specific flags or words in their names",
+  "version": "1.0.1",
+  "description": "Hide tweets from accounts with specific flags or words in their names, hide ads, enable text only mode",
   "permissions": ["storage"],
   "action": {
     "default_popup": "popup.html"
