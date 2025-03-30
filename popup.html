@@ -31,47 +31,24 @@
     </div>
     <div>
       <h4>Hide Right Section</h4>
-      <label><input type="checkbox" id="hideRightSection"> Remove the right sidebar (e.g., "What's happening", "Who to follow")</label>
+      <label><input type="checkbox" id="hideRightSection"> Remove the right sidebar</label>
+    </div>
+    <div>
+      <h4>Custom Background Color</h4>
+      <label>Background Color:</label>
+      <input type="color" id="bgColor" value="#ffffff">
+      <button id="resetBg">Reset Background</button>
     </div>
     <button id="save">Save</button>
   </main>
   <script src="popup.js"></script>
 </body>
-</html>
-
 <style>
-  main {
-    position: relative;
-    min-width: 400px;
-  }
-
-  #themeBtn {
-    position: absolute;
-    padding: 0;
-    height: 2rem!important;
-    width: 2rem!important;
-    top: 0.5rem;
-    right: 0.5rem;
-    display: flex;
-    justify-content: center;
-    border-radius: 100%;
-    align-items: center;
-  }
-
-  /* light background for the button */
-  html[data-theme='dark'] #themeBtn {
-    background-color: #f4f4f4; 
-    color: #111;
-  }
-
-  /* dark background for the button */
-  html[data-theme='light'] #themeBtn {
-    background-color: #111111; 
-    color: #fff;
-  }
-  
-  #save {
-    width: 100%;
-    margin-top: 2rem;
-  }
+  main { position: relative; min-width: 400px; }
+  #themeBtn { position: absolute; padding: 0; height: 2rem!important; width: 2rem!important; top: 0.5rem; right: 0.5rem; display: flex; justify-content: center; border-radius: 100%; align-items: center; }
+  html[data-theme='dark'] #themeBtn { background-color: #f4f4f4; color: #111; }
+  html[data-theme='light'] #themeBtn { background-color: #111111; color: #fff; }
+  #save { width: 100%; margin-top: 2rem; }
+  #resetBg { margin-top: 0.5rem; width: 100%; }
 </style>
+</html>
