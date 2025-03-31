@@ -156,6 +156,13 @@ chrome.storage.sync.get(['flagsToHide', 'wordsToHide', 'filterAds', 'ircMode', '
         .css-175oi2r.r-1awozwy.r-zchlnj.r-1d09ksm,
         .css-175oi2r.r-1awozwy.r-18u37iz.r-zchlnj.r-1d09ksm.r-6gpygo,
         .css-175oi2r.r-1awozwy.r-18u37iz.r-1d09ksm.r-6gpygo,
+        /* Additional selectors for the top navigation bar and its parents */
+        .css-175oi2r.r-zchlnj.r-1d09ksm, /* Broad selector for sticky headers */
+        .css-175oi2r.r-1awozwy.r-zchlnj, /* Parent container of the tabs */
+        .css-175oi2r.r-1d09ksm, /* Any sticky element that might be the header */
+        /* New selectors for the top navigation bar parents */
+        .css-175oi2r.r-aqfbo4.r-gtdqiz.r-1gn8etr.r-1g40b8q, /* Outermost container */
+        .css-175oi2r.r-1e5uvyk.r-6026j, /* Next level container */
         /* Elements with inline background-color */
         [style*="background-color: rgb(0, 0, 0)"],
         [style*="background-color: rgba(0, 0, 0, 0)"] {
