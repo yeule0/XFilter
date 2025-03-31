@@ -10,6 +10,7 @@ The **XFilter** Chrome extension allows you to customize your X (formerly Twitte
 - **Text-Only Mode (IRC Mode)**: Hide all images, videos, and profile pics on X, creating a distraction-free, text-only experience.
 - **Ad Filtering**: Optionally hide ads on X.
 - **Hide Sidebar**: Option to hide right sidebar.
+- **Custom background color**: option to set a custom background color
 
 This extension is perfect for users who want to reduce visual clutter or avoid specific content on X.
 
@@ -19,6 +20,7 @@ This extension is perfect for users who want to reduce visual clutter or avoid s
 - **IRC Mode**: Enable a text-only mode to hide all media (profile pics, images, videos) on X.
 - **Ad Blocking**: Optionally hide promoted tweets (ads).
 - **Hide Sidebar**: Option to hide right sidebar.
+- **Custom background color**: option to set a custom background color
 - **Lightweight and Easy to Use**: Simple popup interface to configure settings.
 
 ## Installation
