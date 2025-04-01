@@ -2,74 +2,70 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-    // Mode: 'development' for readable output and source maps,
-    // change to 'production' for optimized smaller builds later
+    // Use 'development' for easier debugging, 'production' for optimized builds
     mode: 'development',
 
-    // Entry point: Your main content script
+    // Main entry point for the content script
     entry: {
         content: './src/content.js',
     },
 
-    // Output configuration
     output: {
-        // Output bundled JS to a 'dist' directory
+        // Output directory
         path: path.resolve(__dirname, 'dist'),
-        // Name the output file based on the entry key ('content')
+        // Output filename pattern
         filename: '[name].bundle.js',
-        // Clean the output directory before each build
+        // Clean dist/ before each build
         clean: true,
     },
 
-    // Plugins
     plugins: [
         new CopyPlugin({
             patterns: [
-                // Copy necessary ONNX Runtime WASM files from node_modules
+                // Copy ONNX Runtime WASM files needed for the browser environment
                 {
                     from: 'node_modules/onnxruntime-web/dist/*.wasm',
-                    to: '[name][ext]', // Copies to root of dist/ (e.g., dist/ort-wasm-simd-threaded.wasm)
-                    // Important: using '[name][ext]' prevents creating nested 'dist' folder in output
+                    // Use [name][ext] to copy files directly into dist/, preventing nested folders
+                    to: '[name][ext]',
                 },
-                // Copy your model assets
-                { from: 'assets/model', to: 'model' }, // Copies assets/model/* to dist/model/*
-                // Copy your tokenizer assets
-                { from: 'assets/tokenizer', to: 'tokenizer' }, // Copies assets/tokenizer/* to dist/tokenizer/*
-                // Copy your icons
-                { from: 'assets/icons', to: 'icons' }, // Copies assets/icons/* to dist/icons/*
+                // Copy static assets
+                { from: 'assets/model', to: 'model' },
+                { from: 'assets/tokenizer', to: 'tokenizer' },
+                { from: 'assets/icons', to: 'icons' },
                 // Copy popup files
-                { from: 'popup.html', to: 'popup.html' }, // Copies popup.html to dist/popup.html
-                { from: 'popup.js', to: 'popup.js' },     // Copies popup.js to dist/popup.js
-                 // Copy the manifest (optional: could generate it dynamically)
-                 { from: 'manifest.json', to: 'manifest.json' }, // Process manifest last
+                { from: 'popup.html', to: 'popup.html' },
+                { from: 'popup.js', to: 'popup.js' },
+                // Copy the extension manifest
+                { from: 'manifest.json', to: 'manifest.json' },
             ],
         }),
     ],
 
-    // Resolve modules - Helps Webpack find libraries
     resolve: {
-        // Fallback needed for some Node.js core modules polyfilled by libraries (like path, fs)
-        // onnxruntime-web might require some of these
+        // Provide browser polyfills or stubs for Node.js core modules.
+        // Some libraries, like onnxruntime-web, might rely on these.
         fallback: {
              "path": require.resolve("path-browserify"),
-             "fs": false, // Indicate 'fs' is not available/needed in the browser
-             "crypto": false, // Indicate 'crypto' is not available/needed
-             "util": false, // Indicate 'util' is not available/needed
-             "stream": false, // Indicate 'stream' is not available/needed
+             "fs": false, // fs cannot be polyfilled in the browser
+             "crypto": false, // crypto cannot be reliably polyfilled
+             "util": false,
+             "stream": false,
          }
     },
 
-    // Source maps for easier debugging (optional)
+    // Generate source maps for debugging bundled code
     devtool: 'cheap-module-source-map',
 
-    // Performance hints (optional)
+    // Performance hints configuration
     performance: {
-         hints: false, // Turn off warnings about large bundle size (expected for ML models)
+         // Disable warnings about large bundle sizes; expected with ML models/assets.
+         hints: false,
     },
 
-     // Watch options (optional, for development)
-     // watch: true, // Automatically rebuild when files change
+     // Development watch options
+     // watch: true, // Uncomment to automatically rebuild on file changes
      watchOptions: {
+         // Ignore node_modules to prevent unnecessary rebuilds
          ignored: /node_modules/,
      },
 };
