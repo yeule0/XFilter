@@ -270,34 +270,31 @@ function getTweetText(tweetElement) {
     return tweetElement.textContent.replace(/\s+/g, ' ').trim() || '';
 }
 
-// Hide tweets based on settings (Ads, flags, words)
+// Hide tweets based on settings (Ads, flags, words) - Uses V1 Ad Logic
 function filterTweets() {
     document.querySelectorAll('[data-testid="tweet"]:not([data-filter-processed="true"])')
         .forEach(tweet => {
             tweet.setAttribute('data-filter-processed', 'true');
             let shouldHide = false;
-            let reason = '';
+            let reason = ''; // Reason is kept for v2 structure but may not be set by v1 ad logic
 
-            // Ad Filtering
+            // --- START V1 AD FILTERING LOGIC ---
             if (settings.filterAds) {
-                // Look for various indicators of promoted content
-                const adSpan = Array.from(tweet.querySelectorAll('span')).find(span =>
-                    span.innerText.trim() === 'Ad' || span.innerText.trim() === 'Promoted'
-                );
-                const promotedIndicator = tweet.querySelector(
-                    '[data-testid="promotedIndicator"], [data-testid="socialContext"] span'
-                );
-                const promotedLink = tweet.querySelector('a[href*="/i/promoted/"]');
-
-                if (adSpan ||
-                    (promotedIndicator && (promotedIndicator.textContent.includes('Promoted') || promotedIndicator.textContent.includes('Ad'))) ||
-                    promotedLink) {
-                    shouldHide = true;
-                    reason = 'Ad/Promoted';
-                }
+                const spans = tweet.querySelectorAll('span');
+                spans.forEach(span => {
+                    if (span.offsetParent !== null) { // Check if visible
+                        const text = span.innerText.trim();
+                        if (text === 'Ad' || text === 'Promoted') {
+                            shouldHide = true;
+                            reason = 'Ad/Promoted'; // Set reason for v2 compatibility
+                            return; // Exit the inner forEach loop early once found
+                        }
+                    }
+                });
             }
+            // --- END V1 AD FILTERING LOGIC ---
 
-            // Flag/Word Filtering in username/display name
+            // Flag/Word Filtering in username/display name (v2 logic - unchanged)
             if (!shouldHide && (settings.flagsToHide.length > 0 || settings.wordsToHide.length > 0)) {
                 const userNameElement = tweet.querySelector('[data-testid="UserName"]');
                 if (userNameElement) {
@@ -320,7 +317,7 @@ function filterTweets() {
                 }
             }
 
-            // Apply visibility and mark reason
+            // Apply visibility and mark reason (v2 logic - unchanged)
             if (shouldHide) {
                 tweet.style.display = 'none';
                 tweet.setAttribute(`data-${XFILTER_PREFIX}-hidden`, reason);
@@ -338,21 +335,30 @@ function filterTweets() {
         });
 }
 
-// --- IRC Mode --- (Reverted implementation)
-// Hides the profile picture column structure
+
+// --- IRC Mode ---
+// Hides the profile picture column structure *using JS* and adjusts parent layout
 function removeProfilePicBars(tweet) {
+    // This JS function now primarily handles parent layout adjustments,
+    // as the direct hiding should be done faster by CSS.
     const profilePicBar = tweet.querySelector(
+        // Use the same selector as the new CSS rule for consistency
         '.css-175oi2r.r-18kxxzh.r-1wron08.r-onrtq4.r-1awozwy:not([data-irc-processed])'
     );
+    // Check if it contains an avatar, just to be safe
     if (profilePicBar && profilePicBar.querySelector('[data-testid="Tweet-User-Avatar"]')) {
-        profilePicBar.style.display = 'none';
-        // Adjust parent layout slightly
+        // We no longer need profilePicBar.style.display = 'none'; here, CSS handles it.
+        // Apply parent layout adjustments if not already processed
         const parent = profilePicBar.parentElement;
         if (parent) {
-            parent.style.display = 'flex';
-            parent.style.alignItems = 'flex-start';
-            parent.style.gap = '8px';
+            // Check if parent style needs setting/overriding
+            if(parent.style.display !== 'flex' || parent.style.alignItems !== 'flex-start' || parent.style.gap !== '8px') {
+                parent.style.display = 'flex';
+                parent.style.alignItems = 'flex-start';
+                parent.style.gap = '8px';
+            }
         }
+        // Mark as processed so parent styles aren't reapplied repeatedly
         profilePicBar.setAttribute('data-irc-processed', 'true');
     }
 }
@@ -363,16 +369,26 @@ function preserveBadges(tweet) {
         'div[data-testid="User-Name"] svg[aria-label="Verified account"], div[data-testid="User-Name"] img:not([src*="profile_images"])'
     );
     badges.forEach(badge => {
-        badge.parentNode.setAttribute('data-irc-preserve', 'true');
-        badge.style.cssText = 'display: inline !important; margin-left: 4px; vertical-align: middle;';
+        const parentDiv = badge.closest('div[data-testid="User-Name"]'); // Find the User-Name div
+        if (parentDiv) {
+             // Check if the preserve attribute is already on the intended parent or the badge itself
+            if (!parentDiv.hasAttribute('data-irc-preserve') && !badge.parentNode.hasAttribute('data-irc-preserve')) {
+                 parentDiv.setAttribute('data-irc-preserve', 'true'); // Apply to the User-Name div
+            }
+        }
+       // Apply inline styles directly to the badge itself for high specificity
+       badge.style.cssText = 'display: inline !important; margin-left: 4px; vertical-align: middle; height: 1em; width: auto;';
     });
 }
 
-// Applies CSS and runs modifications for IRC mode
+
+// Applies CSS and runs JS modifications for IRC mode
 function applyIRCMode() {
     let css = '';
     if (settings.ircMode) {
         css += `
+        /* --- START IRC Mode CSS --- */
+
         /* Hide media elements */
         [data-testid="tweetPhoto"], [aria-label="Image"],
         [data-testid="testCondensedMedia"], [data-testid="article-cover-image"],
@@ -380,26 +396,78 @@ function applyIRCMode() {
         a[href*="photo"] > div, [style*="padding-bottom: 56.25%"] {
           display: none !important;
         }
-        /* Ensure preserved badges are visible */
-        [data-irc-preserve] {
-          display: inline-flex !important; align-items: center !important;
-          visibility: visible !important;
+
+        /* === FIX FOR PROFILE PIC FLASH === */
+        /* Hide the profile picture column directly via CSS for speed */
+        /* NOTE: This class name might change with Twitter updates! */
+        .css-175oi2r.r-18kxxzh.r-1wron08.r-onrtq4.r-1awozwy {
+          display: none !important;
+          /* Optionally set width to 0 as well */
+          width: 0px !important;
+          min-width: 0px !important;
+          padding: 0 !important;
+          margin: 0 !important;
         }
+        /* === END FIX === */
+
+
+        /* Ensure preserved badges container is visible and styled */
+        /* Target the parent div marked by preserveBadges */
+        div[data-testid="User-Name"][data-irc-preserve] {
+           display: inline-flex !important;
+           align-items: center !important;
+           visibility: visible !important;
+           /* Add some vertical alignment */
+           vertical-align: text-bottom;
+        }
+
+        /* Ensure the badges themselves within the container are visible */
+        /* (Selector from preserveBadges JS) */
+         div[data-testid="User-Name"][data-irc-preserve] svg[aria-label="Verified account"],
+         div[data-testid="User-Name"][data-irc-preserve] img:not([src*="profile_images"]) {
+             display: inline !important; /* Already set inline, but reinforce */
+             visibility: visible !important;
+             opacity: 1 !important;
+             height: 1em; /* Ensure consistent height */
+             width: auto;
+        }
+
+        /* Hide potential separators or elements between username and badges */
+        div[data-testid="User-Name"] > div[dir="ltr"]:not(:has(> span)) { /* Divs without spans (likely separators) */
+           display: none !important;
+        }
+
+        /* --- END IRC Mode CSS --- */
       `;
     }
-    ircStyleTag.textContent = css;
+    // Only update if CSS content changes
+    if (ircStyleTag.textContent !== css) {
+       ircStyleTag.textContent = css;
+    }
 
-    // Process tweets if IRC mode is active
+
+    // Process tweets with JS functions if IRC mode is active
+    // This will handle parent layout adjustments and badge marking
     if (settings.ircMode) {
-        document.querySelectorAll('[data-testid="tweet"]:not([data-irc-processed])')
+        document.querySelectorAll('[data-testid="tweet"]') // Process all tweets, not just unprocessed for this part
             .forEach(tweet => {
-                preserveBadges(tweet);
-                removeProfilePicBars(tweet);
-                tweet.setAttribute('data-irc-processed', 'true');
+                // Check if not hidden by other filters first
+                if (tweet.style.display !== 'none' && !tweet.hasAttribute(`data-${XFILTER_PREFIX}-hidden`)) {
+                     preserveBadges(tweet); // Ensure badges are marked correctly
+                     removeProfilePicBars(tweet); // Ensure parent layout is adjusted
+                }
             });
-        // Note: A dedicated observer might be needed if the main one isn't fast enough for IRC updates
+        // Note: The :not([data-irc-processed]) selector was removed from the JS loop querySelector
+        // because we now rely on the attribute *inside* removeProfilePicBars to prevent redundant parent styling.
+        // We still need preserveBadges to run potentially multiple times if attributes change.
+    } else {
+        // Cleanup if IRC mode is turned off
+        document.querySelectorAll('[data-irc-preserve]').forEach(el => el.removeAttribute('data-irc-preserve'));
+        document.querySelectorAll('[data-irc-processed]').forEach(el => el.removeAttribute('data-irc-processed'));
+        // Consider resetting parent styles if needed, though often not necessary
     }
 }
+
 
 // --- Custom Background --- (Reverted implementation)
 // Applies custom background color, overriding common Twitter elements
@@ -440,7 +508,11 @@ function applyCustomBackground() {
         }
       `;
     }
-    bgStyleTag.textContent = css;
+     // Only update if CSS content changes
+    if (bgStyleTag.textContent !== css) {
+        bgStyleTag.textContent = css;
+    }
+
 
     // Also try to dynamically clear inline black backgrounds added by JS
     if (useBackground) {
@@ -598,8 +670,8 @@ function debounce(func, wait) {
 // Main function called on timeline changes
 const processTimelineChanges = async () => {
     // Apply visual filters/styles first
-    filterTweets();
-    applyIRCMode();
+    filterTweets(); // Uses v1 ad logic now
+    applyIRCMode(); // Applies CSS immediately, JS processing happens too
     applyCustomBackground();
     hideRightSectionFunc();
 
@@ -627,7 +699,9 @@ const processTimelineChanges = async () => {
 };
 
 // Debounced version for the observer to avoid excessive calls
-const debouncedProcessTimeline = debounce(processTimelineChanges, 750);
+// Keeping the debounce time you preferred (assuming 250ms was chosen, otherwise adjust here)
+const DEBOUNCE_DELAY = 250; // Adjust if needed (e.g., back to 750)
+const debouncedProcessTimeline = debounce(processTimelineChanges, DEBOUNCE_DELAY);
 
 // Callback function for the MutationObserver
 const observerCallback = (mutationsList, observer) => {
@@ -637,8 +711,10 @@ const observerCallback = (mutationsList, observer) => {
         if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
             for (const node of mutation.addedNodes) {
                 if (node.nodeType === Node.ELEMENT_NODE) {
+                    // Check if the added node *is* or *contains* a tweet or major column/timeline structure
                     if ((node.matches && (
-                         node.matches('[data-testid="tweet"], div[aria-label*="Timeline"], section[role="region"], [data-testid="primaryColumn"], [data-testid="cellInnerDiv"]'))) ||
+                         node.matches('[data-testid="tweet"], div[aria-label*="Timeline"], section[role="region"], [data-testid="primaryColumn"], [data-testid="cellInnerDiv"]')
+                      )) ||
                          node.querySelector('[data-testid="tweet"]'))
                     {
                         relevantMutation = true; break;
@@ -647,13 +723,20 @@ const observerCallback = (mutationsList, observer) => {
                      if(node.matches && node.matches('[style*="background-color:"]')) {
                         relevantMutation = true; break;
                     }
+                     // Check specifically if the avatar column was added (relevant for IRC mode)
+                     if (node.matches && node.matches('.css-175oi2r.r-18kxxzh.r-1wron08.r-onrtq4.r-1awozwy')) {
+                         relevantMutation = true; break;
+                     }
                 }
             }
         }
         // Check for direct style attribute changes (mainly for background color)
          if (!relevantMutation && mutation.type === 'attributes' && mutation.attributeName === 'style') {
             const target = mutation.target;
-            if (target?.style?.backgroundColor) relevantMutation = true;
+            // Check if the background changed or if display style changed on the avatar column
+             if (target?.style?.backgroundColor || (target?.matches('.css-175oi2r.r-18kxxzh.r-1wron08.r-onrtq4.r-1awozwy') && target.style.display)) {
+                relevantMutation = true;
+            }
         }
         if (relevantMutation) break; // Stop checking if we found one
     }
@@ -690,8 +773,9 @@ async function main() {
     }
 
     // Initial application of styles and filters
-    filterTweets();
+    // Run applyIRCMode first to inject CSS rules immediately
     applyIRCMode();
+    filterTweets();
     applyCustomBackground();
     hideRightSectionFunc();
 
@@ -705,14 +789,14 @@ async function main() {
     // Run initial processing after a short delay to catch content loaded after script injection
     setTimeout(() => {
         console.log("XFilter: Running initial delayed processing...");
-        processTimelineChanges();
+        processTimelineChanges(); // This will re-run applyIRCMode etc.
     }, 1500);
 
     // Set up the Mutation Observer to watch for DOM changes
     const targetNode = document.body;
     const observer = new MutationObserver(observerCallback);
     const observerConfig = {
-        childList: true, subtree: true, attributes: true, attributeFilter: ['style']
+        childList: true, subtree: true, attributes: true, attributeFilter: ['style'] // Observe style changes too
     };
     observer.observe(targetNode, observerConfig);
     console.log("XFilter: Mutation observer started.");
@@ -729,25 +813,39 @@ async function main() {
 async function handleMessages(message, sender, sendResponse) {
     console.log("XFilter: Received message:", message.action);
     let requireProcessingTrigger = false;
+    let settingsChanged = false; // Flag to check if settings relevant to processing changed
 
     if (message.action === 'settingsUpdated' && message.settings) {
         const oldSettings = { ...settings };
         const newSettings = message.settings;
         settings = { ...settings, ...newSettings }; // Update local settings
         console.log('XFilter: Settings updated via message.');
+        settingsChanged = true; // Mark that settings were updated
 
-        // Re-apply visual styles immediately
-        filterTweets();
-        applyIRCMode();
-        applyCustomBackground();
-        hideRightSectionFunc();
-        requireProcessingTrigger = true; // Need to re-process for potential scoring/reordering changes
+        // Check specifically if settings affecting visual processing changed
+        const visualSettingsChanged = oldSettings.filterAds !== newSettings.filterAds ||
+                                     oldSettings.ircMode !== newSettings.ircMode ||
+                                     oldSettings.hideRightSection !== newSettings.hideRightSection ||
+                                     oldSettings.bgColor !== newSettings.bgColor ||
+                                     JSON.stringify(oldSettings.flagsToHide) !== JSON.stringify(newSettings.flagsToHide) ||
+                                     JSON.stringify(oldSettings.wordsToHide) !== JSON.stringify(newSettings.wordsToHide);
+
+         if (visualSettingsChanged) {
+              // Re-apply visual styles immediately only if they changed
+              applyIRCMode(); // Update CSS rules
+              filterTweets(); // Re-filter based on new rules
+              applyCustomBackground();
+              hideRightSectionFunc();
+              requireProcessingTrigger = true; // Trigger full processing later
+         }
+
 
         const reorderEnabledChanged = oldSettings.enableReordering !== newSettings.enableReordering;
         const keywordsChanged = JSON.stringify(oldSettings.interestKeywords) !== JSON.stringify(newSettings.interestKeywords);
 
         // Handle changes related to reordering feature
         if (newSettings.enableReordering && (reorderEnabledChanged || keywordsChanged)) {
+            requireProcessingTrigger = true; // Need full processing cycle
             if (!modelReady) {
                 console.log("XFilter: Enabling/updating reordering, initializing model...");
                 await initializeModel(); // Ensure model is ready
@@ -766,6 +864,7 @@ async function handleMessages(message, sender, sendResponse) {
                 console.log("XFilter: Marked tweets for rescoring.");
             }
         } else if (!newSettings.enableReordering && reorderEnabledChanged) {
+             requireProcessingTrigger = true; // Need full processing cycle to clean up
             // Clean up if reordering was disabled
             console.log("XFilter: Reordering disabled.");
             averageInterestEmbedding = null;
@@ -783,6 +882,7 @@ async function handleMessages(message, sender, sendResponse) {
             settings.bgColor = message.bgColor || DEFAULT_BG_COLOR;
             applyCustomBackground(); // Just update the background style
             sendResponse({ status: "Background updated" });
+            // No need to trigger full processing just for background
         } else {
             sendResponse({ status: "Background unchanged" });
         }
@@ -793,19 +893,24 @@ async function handleMessages(message, sender, sendResponse) {
     }
 
     // Trigger a processing cycle if needed after handling the message
-    if (requireProcessingTrigger) {
+    // Only trigger if settings relevant to processing actually changed
+    if (requireProcessingTrigger && settingsChanged) {
+        console.log("XFilter: Scheduling processing after settings update.");
         scheduleReorder(false); // Use debounced version
     }
 
-    return false; // Indicate synchronous response handling
+    // Use 'return true' for async response if needed, but here we handle synchronously
+    // return true; // Example if response was async
+     return false; // Indicate synchronous response handling
 }
+
 
 // --- Helpers ---
 // Helper to trigger processing, debounced by default
 function scheduleReorder(forceImmediate = false) {
     if (forceImmediate) {
         console.log("XFilter: Forcing immediate timeline processing...");
-        // Use setTimeout to push to end of execution queue
+        // Use setTimeout to push to end of execution queue, ensuring it runs after current stack
         setTimeout(processTimelineChanges, 0);
     } else {
         debouncedProcessTimeline();
