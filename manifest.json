@@ -1,9 +1,12 @@
 {
   "manifest_version": 3,
   "name": "XFilter",
-  "version": "1.0.1",
-  "description": "Hide tweets from accounts with specific flags or words in their names, hide ads, enable text only mode",
-  "permissions": ["storage", "tabs"], 
+  "version": "1.1.0",
+  "description": "Filter, customize, and semantically reorder your X/Twitter timeline.",
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -19,8 +22,26 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://twitter.com/*", "https://x.com/*"],
-      "js": ["content.js"]
+      "matches": [
+        "https://twitter.com/*",
+        "https://x.com/*"
+      ],
+      "js": [
+        "content.bundle.js"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "model/*",
+        "tokenizer/*",
+        "*.wasm"
+      ],
+      "matches": [
+        "https://twitter.com/*",
+        "https://x.com/*"
+      ]
     }
   ]
 }

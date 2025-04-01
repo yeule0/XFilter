@@ -1,3 +1,4 @@
+// Theme toggle logic (no changes)
 document.getElementById('themeBtn').addEventListener('click', () => {
   const html = document.documentElement;
   const currentTheme = html.getAttribute('data-theme');
@@ -7,83 +8,85 @@ document.getElementById('themeBtn').addEventListener('click', () => {
   themeIcon.classList = newTheme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
 });
 
+// Save settings
 document.getElementById('save').addEventListener('click', () => {
-  const flags = document.getElementById('flags').value.split(',').map(flag => flag.trim());
-  const words = document.getElementById('words').value.split(',').map(word => word.trim());
+  const flags = document.getElementById('flags').value.split(',').map(flag => flag.trim()).filter(Boolean);
+  const words = document.getElementById('words').value.split(',').map(word => word.trim()).filter(Boolean);
   const filterAds = document.getElementById('filterAds').checked;
   const ircMode = document.getElementById('ircMode').checked;
   const hideRightSection = document.getElementById('hideRightSection').checked;
   const bgColor = document.getElementById('bgColor').value;
+  const enableReordering = document.getElementById('enableReordering').checked;
+  const interestKeywords = document.getElementById('interestKeywords').value.split(',').map(kw => kw.trim()).filter(Boolean);
 
-  // Save settings to storage
-  chrome.storage.sync.set({
+  const settings = {
     flagsToHide: flags,
     wordsToHide: words,
     filterAds: filterAds,
     ircMode: ircMode,
     hideRightSection: hideRightSection,
-    bgColor: bgColor
-  }, () => {
-    console.log('Settings saved:', { flags, words, filterAds, ircMode, hideRightSection, bgColor });
+    bgColor: bgColor,
+    enableReordering: enableReordering,
+    interestKeywords: interestKeywords
+  };
 
-    // Send background settings to content script in the active tab
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: 'updateBackground',
-          bgColor: bgColor
-        }, (response) => {
-          if (chrome.runtime.lastError) {
-            console.log('Error sending message:', chrome.runtime.lastError.message);
-          } else {
-            console.log('Message sent successfully:', response);
-          }
-        });
-      }
-    });
+  // Save settings to storage
+  chrome.storage.sync.set(settings, () => {
+    console.log('Settings saved:', settings);
+
+    // Send settings update message to content script (optional, content script reloads on nav anyway)
+     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+       if (tabs[0]?.id) {
+         chrome.tabs.sendMessage(tabs[0].id, {
+           action: 'settingsUpdated',
+           settings: settings // Send all settings
+         }).catch(error => console.log(`Could not send settings update message: ${error.message}`));
+       }
+     });
 
     alert('Settings saved');
   });
 });
 
+// Reset Background button (no changes needed here, but ensure message is handled)
 document.getElementById('resetBg').addEventListener('click', () => {
-  chrome.storage.sync.set({
-    bgColor: '#ffffff'
-  }, () => {
-    console.log('Background reset to default');
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: 'updateBackground',
-          bgColor: '#ffffff'
-        }, (response) => {
-          if (chrome.runtime.lastError) {
-            console.log('Error sending message:', chrome.runtime.lastError.message);
-          } else {
-            console.log('Message sent successfully:', response);
-          }
+    const defaultBgColor = '#ffffff';
+    chrome.storage.sync.set({ bgColor: defaultBgColor }, () => {
+        console.log('Background reset to default');
+        document.getElementById('bgColor').value = defaultBgColor;
+
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0]?.id) {
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    action: 'updateBackground',
+                    bgColor: defaultBgColor
+                }).catch(error => console.log(`Could not send background reset message: ${error.message}`));
+            }
         });
-      }
+        alert('Background reset to default');
     });
-    document.getElementById('bgColor').value = '#ffffff';
-    alert('Background reset to default');
-  });
 });
 
-chrome.storage.sync.get(['flagsToHide', 'wordsToHide', 'filterAds', 'ircMode', 'hideRightSection', 'bgColor'], (data) => {
-  const flags = data.flagsToHide || [];
-  const words = data.wordsToHide || [];
-  const filterAds = data.filterAds !== undefined ? data.filterAds : true;
-  const ircMode = data.ircMode !== undefined ? data.ircMode : false;
-  const hideRightSection = data.hideRightSection !== undefined ? data.hideRightSection : false;
-  const bgColor = data.bgColor || '#ffffff';
 
-  console.log('Loaded settings:', { bgColor });
+// Load settings on popup open
+chrome.storage.sync.get([
+    'flagsToHide',
+    'wordsToHide',
+    'filterAds',
+    'ircMode',
+    'hideRightSection',
+    'bgColor',
+    'enableReordering',
+    'interestKeywords'
+    ], (data) => {
+    document.getElementById('flags').value = (data.flagsToHide || []).join(', ');
+    document.getElementById('words').value = (data.wordsToHide || []).join(', ');
+    document.getElementById('filterAds').checked = data.filterAds !== undefined ? data.filterAds : true;
+    document.getElementById('ircMode').checked = data.ircMode !== undefined ? data.ircMode : false;
+    document.getElementById('hideRightSection').checked = data.hideRightSection !== undefined ? data.hideRightSection : false;
+    document.getElementById('bgColor').value = data.bgColor || '#ffffff';
+    document.getElementById('enableReordering').checked = data.enableReordering !== undefined ? data.enableReordering : false;
+    document.getElementById('interestKeywords').value = (data.interestKeywords || []).join(', ');
 
-  document.getElementById('flags').value = flags.join(', ');
-  document.getElementById('words').value = words.join(', ');
-  document.getElementById('filterAds').checked = filterAds;
-  document.getElementById('ircMode').checked = ircMode;
-  document.getElementById('hideRightSection').checked = hideRightSection;
-  document.getElementById('bgColor').value = bgColor;
+    console.log('Loaded settings:', data);
 });
