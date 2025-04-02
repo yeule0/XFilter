@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "XFilter",
-  "version": "1.1.0",
+  "version": "1.2.0", 
   "description": "Filter, customize, and semantically reorder your X/Twitter timeline.",
   "permissions": [
     "storage",
@@ -27,7 +27,7 @@
         "https://x.com/*"
       ],
       "js": [
-        "content.bundle.js"
+        "content.bundle.js" 
       ]
     }
   ],
@@ -36,7 +36,8 @@
       "resources": [
         "model/*",
         "tokenizer/*",
-        "*.wasm"
+        "*.wasm",
+        "*.mjs"     
       ],
       "matches": [
         "https://twitter.com/*",
@@ -44,4 +45,5 @@
       ]
     }
   ]
+  
 }
