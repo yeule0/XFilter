@@ -7,83 +7,73 @@ document.getElementById('themeBtn').addEventListener('click', () => {
   themeIcon.classList = newTheme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
 });
 
-document.getElementById('save').addEventListener('click', () => {
-  const flags = document.getElementById('flags').value.split(',').map(flag => flag.trim());
-  const words = document.getElementById('words').value.split(',').map(word => word.trim());
-  const filterAds = document.getElementById('filterAds').checked;
-  const ircMode = document.getElementById('ircMode').checked;
-  const hideRightSection = document.getElementById('hideRightSection').checked;
-  const bgColor = document.getElementById('bgColor').value;
+function getCurrentSettingsFromForm() {
+    const flags = document.getElementById('flags').value.split(',').map(flag => flag.trim()).filter(Boolean);
+    const words = document.getElementById('words').value.split(',').map(word => word.trim()).filter(Boolean);
+    const filterAds = document.getElementById('filterAds').checked;
+    const ircMode = document.getElementById('ircMode').checked;
+    const hideRightSection = document.getElementById('hideRightSection').checked;
+    const bgColor = document.getElementById('bgColor').value;
+    return { flagsToHide: flags, wordsToHide: words, filterAds, ircMode, hideRightSection, bgColor };
+}
 
-  // Save settings to storage
-  chrome.storage.sync.set({
-    flagsToHide: flags,
-    wordsToHide: words,
-    filterAds: filterAds,
-    ircMode: ircMode,
-    hideRightSection: hideRightSection,
-    bgColor: bgColor
-  }, () => {
-    console.log('Settings saved:', { flags, words, filterAds, ircMode, hideRightSection, bgColor });
-
-    // Send background settings to content script in the active tab
+function sendSettingsToContentScript(settings) {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: 'updateBackground',
-          bgColor: bgColor
-        }, (response) => {
-          if (chrome.runtime.lastError) {
-            console.log('Error sending message:', chrome.runtime.lastError.message);
-          } else {
-            console.log('Message sent successfully:', response);
+      if (tabs[0] && tabs[0].id) {
+        chrome.tabs.sendMessage(
+          tabs[0].id,
+          {
+            action: 'settingsUpdated',
+            settings: settings
+          },
+          (response) => {
+            if (chrome.runtime.lastError) {
+              console.error('XFilter Popup: Error sending message:', chrome.runtime.lastError.message);
+            } else {
+              console.log('XFilter Popup: Settings message sent successfully, response:', response);
+            }
           }
-        });
+        );
+      } else {
+        console.warn("XFilter Popup: Could not find active tab to send settings.");
       }
     });
+}
 
+document.getElementById('save').addEventListener('click', () => {
+  const currentSettings = getCurrentSettingsFromForm();
+  chrome.storage.sync.set(currentSettings, () => {
+    console.log('XFilter Popup: Settings saved to storage:', currentSettings);
+    sendSettingsToContentScript(currentSettings);
     alert('Settings saved');
   });
 });
 
 document.getElementById('resetBg').addEventListener('click', () => {
-  chrome.storage.sync.set({
-    bgColor: '#ffffff'
-  }, () => {
-    console.log('Background reset to default');
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: 'updateBackground',
-          bgColor: '#ffffff'
-        }, (response) => {
-          if (chrome.runtime.lastError) {
-            console.log('Error sending message:', chrome.runtime.lastError.message);
-          } else {
-            console.log('Message sent successfully:', response);
-          }
-        });
-      }
-    });
-    document.getElementById('bgColor').value = '#ffffff';
+  const defaultBgColor = '#ffffff';
+  chrome.storage.sync.set({ bgColor: defaultBgColor }, () => {
+    console.log('XFilter Popup: Background reset to default in storage.');
+    document.getElementById('bgColor').value = defaultBgColor;
+    const currentSettings = getCurrentSettingsFromForm();
+    sendSettingsToContentScript(currentSettings);
     alert('Background reset to default');
   });
 });
 
-chrome.storage.sync.get(['flagsToHide', 'wordsToHide', 'filterAds', 'ircMode', 'hideRightSection', 'bgColor'], (data) => {
-  const flags = data.flagsToHide || [];
-  const words = data.wordsToHide || [];
-  const filterAds = data.filterAds !== undefined ? data.filterAds : true;
-  const ircMode = data.ircMode !== undefined ? data.ircMode : false;
-  const hideRightSection = data.hideRightSection !== undefined ? data.hideRightSection : false;
-  const bgColor = data.bgColor || '#ffffff';
+document.addEventListener('DOMContentLoaded', () => {
+    chrome.storage.sync.get(['flagsToHide', 'wordsToHide', 'filterAds', 'ircMode', 'hideRightSection', 'bgColor'], (data) => {
+        document.getElementById('flags').value = (data.flagsToHide || []).join(', ');
+        document.getElementById('words').value = (data.wordsToHide || []).join(', ');
+        document.getElementById('filterAds').checked = data.filterAds !== undefined ? data.filterAds : true;
+        document.getElementById('ircMode').checked = data.ircMode !== undefined ? data.ircMode : false;
+        document.getElementById('hideRightSection').checked = data.hideRightSection !== undefined ? data.hideRightSection : false;
+        document.getElementById('bgColor').value = data.bgColor || '#ffffff';
+        console.log('XFilter Popup: Loaded settings into form.');
+    });
 
-  console.log('Loaded settings:', { bgColor });
-
-  document.getElementById('flags').value = flags.join(', ');
-  document.getElementById('words').value = words.join(', ');
-  document.getElementById('filterAds').checked = filterAds;
-  document.getElementById('ircMode').checked = ircMode;
-  document.getElementById('hideRightSection').checked = hideRightSection;
-  document.getElementById('bgColor').value = bgColor;
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme') || 'dark';
+    html.setAttribute('data-theme', currentTheme);
+    const themeIcon = document.getElementById('theme-icon');
+    themeIcon.classList = currentTheme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
 });
