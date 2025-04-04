@@ -1,12 +1,11 @@
-# XFilter (Flag & Word Filter Chrome Extension)
-
+# XFilter 
 
 A Chrome extension to enhance your experience on X by filtering tweets and enabling a text-only mode.
 
 ## Overview
 
 The **XFilter** Chrome extension allows you to customize your X (formerly Twitter) experience by:
-- **Filtering Tweets**: Hide tweets from users whose display names contain specific flags or words (e.g., emojis, keywords).
+- **Filtering Tweets**: Hide tweets from users whose display names contain specific flags, emojis or words (e.g., emojis, keywords).
 - **Text-Only Mode (IRC Mode)**: Hide all images, videos, and profile pics on X, creating a distraction-free, text-only experience.
 - **Ad Filtering**: Optionally hide ads on X.
 - **Hide Sidebar**: Option to hide right sidebar.
