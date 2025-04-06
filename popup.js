@@ -41,11 +41,22 @@ function sendSettingsToContentScript(settings) {
 }
 
 document.getElementById('save').addEventListener('click', () => {
+  const saveButton = document.getElementById('save');
+  const originalButtonText = saveButton.textContent;
   const currentSettings = getCurrentSettingsFromForm();
+
+  saveButton.textContent = 'Saving...';
+  saveButton.disabled = true;
+
   chrome.storage.sync.set(currentSettings, () => {
     console.log('XFilter Popup: Settings saved to storage:', currentSettings);
     sendSettingsToContentScript(currentSettings);
-    alert('Settings saved');
+
+    saveButton.textContent = 'Settings Saved!';
+    setTimeout(() => {
+      saveButton.textContent = originalButtonText;
+      saveButton.disabled = false;
+    }, 1500);
   });
 });
 
@@ -56,7 +67,7 @@ document.getElementById('resetBg').addEventListener('click', () => {
     document.getElementById('bgColor').value = defaultBgColor;
     const currentSettings = getCurrentSettingsFromForm();
     sendSettingsToContentScript(currentSettings);
-    alert('Background reset to default');
+    console.log('XFilter Popup: Background reset applied.');
   });
 });
 
@@ -64,9 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.sync.get(['flagsToHide', 'wordsToHide', 'filterAds', 'ircMode', 'hideRightSection', 'bgColor'], (data) => {
         document.getElementById('flags').value = (data.flagsToHide || []).join(', ');
         document.getElementById('words').value = (data.wordsToHide || []).join(', ');
-        document.getElementById('filterAds').checked = data.filterAds !== undefined ? data.filterAds : true;
-        document.getElementById('ircMode').checked = data.ircMode !== undefined ? data.ircMode : false;
-        document.getElementById('hideRightSection').checked = data.hideRightSection !== undefined ? data.hideRightSection : false;
+        document.getElementById('filterAds').checked = data.filterAds !== undefined ? data.filterAds : true; // Default true
+        document.getElementById('ircMode').checked = data.ircMode !== undefined ? data.ircMode : false; // Default false
+        document.getElementById('hideRightSection').checked = data.hideRightSection !== undefined ? data.hideRightSection : false; // Default false
         document.getElementById('bgColor').value = data.bgColor || '#ffffff';
         console.log('XFilter Popup: Loaded settings into form.');
     });

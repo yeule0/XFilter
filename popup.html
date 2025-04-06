@@ -6,13 +6,30 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <meta name="color-scheme" content="light dark">
-  <title>Flag & Word Filter</title>
+  <title>Flag & Word Filter</title> 
+  <style>
+    main { position: relative; min-width: 400px; padding-bottom: 1rem; } 
+    #themeBtn { position: absolute; padding: 0; height: 2rem!important; width: 2rem!important; top: 0.5rem; right: 0.5rem; display: flex; justify-content: center; border-radius: 100%; align-items: center; z-index: 10; border: none; } 
+    html[data-theme='dark'] #themeBtn { background-color: #f1f1f1; color: #11191f; } 
+    html[data-theme='light'] #themeBtn { background-color: #11191f; color: #f1f1f1; } 
+    #save, #resetBg { width: 100%; } 
+    #save { margin-top: 1.5rem; margin-bottom: 1.5rem; } 
+    #resetBg { margin-top: 0.5rem; } 
+    label[for] { margin-bottom: 0.25rem; display: inline-block; } 
+    div > label > input[type="checkbox"] { margin-right: 0.5rem; } 
+    #bgColor { margin-right: 0.5rem; vertical-align: middle; } 
+    label[for="bgColor"] { margin-right: 0.5rem; } 
+    div > h4 { margin-bottom: 0.5rem; } 
+  </style>
 </head>
 <body>
   <main class="container">
-    <button id="themeBtn">
+    
+    <button id="themeBtn" aria-label="Toggle theme"> 
       <i id="theme-icon" class="bi bi-sun-fill"></i>
     </button>
+
+  
     <div>
       <h4>Enter flags to hide (e.g., 🇺🇸, 🏳️‍🌈)</h4>
       <input type="text" id="flags" placeholder="Separate flags with commas">
@@ -23,32 +40,29 @@
     </div>
     <div>
       <h4>Filter promoted posts</h4>
-      <label><input type="checkbox" id="filterAds"> Hide tweets labeled "Ad"</label>
+      <label><input type="checkbox" id="filterAds" role="switch"> Hide tweets labeled "Ad"</label>
     </div>
+
     <div>
       <h4>IRC Mode</h4>
-      <label><input type="checkbox" id="ircMode"> Hide images, videos, and profile pics (text-only)</label>
+      <label><input type="checkbox" id="ircMode" role="switch"> Hide images, videos, and profile pics (text-only)</label>
     </div>
     <div>
       <h4>Hide Right Section</h4>
-      <label><input type="checkbox" id="hideRightSection"> Remove the right sidebar</label>
+      <label><input type="checkbox" id="hideRightSection" role="switch"> Remove the right sidebar</label>
     </div>
     <div>
       <h4>Custom Background Color</h4>
-      <label>Background Color:</label>
+      <label for="bgColor">Background:</label>
       <input type="color" id="bgColor" value="#ffffff">
-      <button id="resetBg">Reset Background</button>
+      <button id="resetBg" class="secondary outline">Reset Background</button>
     </div>
-    <button id="save">Save</button>
+
+  
+    <button id="save">Save Settings</button>
+
+
   </main>
   <script src="popup.js"></script>
 </body>
-<style>
-  main { position: relative; min-width: 400px; }
-  #themeBtn { position: absolute; padding: 0; height: 2rem!important; width: 2rem!important; top: 0.5rem; right: 0.5rem; display: flex; justify-content: center; border-radius: 100%; align-items: center; }
-  html[data-theme='dark'] #themeBtn { background-color: #f4f4f4; color: #111; }
-  html[data-theme='light'] #themeBtn { background-color: #111111; color: #fff; }
-  #save { width: 100%; margin-top: 2rem; }
-  #resetBg { margin-top: 0.5rem; width: 100%; }
-</style>
 </html>
